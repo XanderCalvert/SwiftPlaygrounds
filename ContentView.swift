@@ -31,14 +31,14 @@ struct ContentView: View {
                 // Vertically stacks its child views.
                 
                 // Add a toggle for dark mode
-                HStack {
-                    Spacer()
-                    Toggle(isOn: $isDarkMode) {
-                        Text("Dark Mode")
-                            .font(.caption)
-                    }
-                    .padding()
-                }
+//                HStack {
+//                    Spacer()
+//                    Toggle(isOn: $isDarkMode) {
+//                        Text("Dark Mode")
+//                            .font(.caption)
+//                    }
+//                    .padding()
+//                }
                 
                 // Input field and add button
                 HStack {
@@ -94,11 +94,25 @@ struct ContentView: View {
                                         .foregroundColor(task.isDone ? .gray : .primary)
                                         // Sets the text colour to gray if done, otherwise uses the default colour.
                                 }
-                                .onTapGesture {
-                                    // Allows tapping the row to enter editing mode.
-                                    editingTaskID = task.id // Set the editing task ID to the current task.
-                                }
                             }
+                        }
+                        .swipeActions(edge: .trailing) {
+                            
+                            // Delete button
+                            Button(role: .destructive) {
+                                deleteTask(by: task.id) // Delete using UUID.
+                            } label: {
+                                Label("Delete", systemImage: "trash") // Trash icon.
+                            }
+                            
+                            // Edit button
+                            Button {
+                                editingTaskID = task.id // Enter editing mode.
+                            } label: {
+                                Label("Edit", systemImage: "pencil") // Pencil icon.
+                            }
+                            .tint(.orange) // Orange tint for edit button.
+
                         }
                     }
                     .onDelete(perform: deleteTask)
@@ -131,10 +145,15 @@ struct ContentView: View {
     }
 
     private func deleteTask(at offsets: IndexSet) {
-        // Deletes tasks from the list.
-        tasks.remove(atOffsets: offsets)
-        // Removes tasks at the specified offsets.
-        saveTasks() // Save tasks to persistent storage.
+        tasks.remove(atOffsets: offsets) // Removes tasks using IndexSet.
+        saveTasks()
+    }
+
+    private func deleteTask(by id: UUID) {
+        if let index = tasks.firstIndex(where: { $0.id == id }) {
+            tasks.remove(at: index) // Remove task by UUID.
+            saveTasks()
+        }
     }
 
     private func saveTasks() {
